@@ -68,7 +68,7 @@ int main(int argc, char* argv[])
         float somaret ;
         float mediaret ;
         float somades2;
-        float desviopadrao;
+        double desviopadrao;
         double sharpe ;
         float rettotal ;
 
@@ -90,7 +90,7 @@ int main(int argc, char* argv[])
         float somades2 ;
         float retorno[15000] ;
         double desviopadrao ;
-        float sharpe ;
+        double sharpe ;
 
         float rmaior, rmenor ;
     } TipoMoeda ;
@@ -192,11 +192,12 @@ int main(int argc, char* argv[])
     }
      for (i = 0; i < argc-1 ; i++) { //Calculo de desvio padrao, sharpe e retorno total de cada moeda
         moeda[i].rettotal = (moeda[i].p1 - moeda[i].pf)/moeda[i].pf ;
+        moeda[i].somades2 = 0 ;
         for(j=0 ; j < moeda[i].tamanho-1 ; j++ ){
             //moeda[i].somades2 += (moeda[i].retorno[j] - moeda[i].mediaret)*(moeda[i].retorno[j] - moeda[i].mediaret) ;
-            moeda[i].somades2 += (moeda[i].retorno[j] - moeda[i].mediaret)*(moeda[i].retorno[j] - moeda[i].mediaret) ; //
+            moeda[i].somades2 += ((moeda[i].retorno[j] - moeda[i].mediaret)*(moeda[i].retorno[j] - moeda[i].mediaret) ); //
         }
-       moeda[i].desviopadrao = sqrt(moeda[i].somades2 / moeda[i].tamanho) ;
+       moeda[i].desviopadrao = sqrt(moeda[i].somades2 / (moeda[i].tamanho-1)) ;
        moeda[i].sharpe = (moeda[i].mediaret - 0.00038)/moeda[i].desviopadrao ;
     }
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -252,13 +253,14 @@ int main(int argc, char* argv[])
         printf ("%8.2f%%", moeda[i].rmenor*100) ;
         printf ("%10.2f%%", moeda[i].rmaior*100) ;
         printf ("%9.2f%%", moeda[i].mediaret*100) ;
-        printf ("%10.2f%%", moeda[i].desviopadrao*100) ;
+        printf ("%10.2lf%%", moeda[i].desviopadrao*100) ;
         printf ("%11.2f%%", moeda[i].rettotal*100) ;
         printf ("%11.2lf%%", moeda[i].sharpe*100) ;
         printf ("\n") ;
     }
     char aux1[9] ;
     for (i= 0 ; i < 4 ; i++){
+        if (argc<=2) break;
         printf ("%s%-2d ","PORTIFOLIO", i+1 );
         strncpy(aux1,dataretorno[portif[i].indicemenor], sizeof(aux1)) ;
         printf (  "%02s"    ,strtok( aux1, "/"  ) );
@@ -272,7 +274,7 @@ int main(int argc, char* argv[])
         printf ("%8.2f%%", portif[i].menorret*100) ;
         printf ("%10.2f%%", portif[i].maiorret*100) ;
         printf ("%9.2f%%", portif[i].mediaret*100) ;
-        printf ("%10.2f%%", portif[i].desviopadrao*100) ;
+        printf ("%10.2lf%%", portif[i].desviopadrao*100) ;
         printf ("%11.2f%%", portif[i].rettotal*100) ;
         printf ("%11.2lf%%", portif[i].sharpe*100) ;
         printf ("\n") ;
@@ -281,9 +283,10 @@ int main(int argc, char* argv[])
         printf ("PORPORCOES:\n") ;
         printf ("\n") ;
         for (i= 0 ; i < 4 ; i++){
-            printf ("%s%-15d ","PORTIFOLIO", i+1 );
+            printf ("%s%-7d ","PORTIFOLIO", i+1 );
             for (j=0 ; j < argc-1 ; j++){
-                printf("%f,  ", portif[i].proporcao[j]) ;
+                printf("%.2f", portif[i].proporcao[j]) ;
+                if (j == argc-2) break; else printf(", ") ;
             }
             printf("\n") ;
         }
