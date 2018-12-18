@@ -95,7 +95,7 @@ int main(int argc, char* argv[])
 
 
 
-        char dataretorno[15000][9] ;
+    char dataretorno[15000][9] ;
 
     srand(time(NULL));
     float aux = 1 ;
@@ -133,7 +133,7 @@ int main(int argc, char* argv[])
         }
         fscanf(moeda[i-1].m, "%d ", &moeda[i-1].tamanho ) ;
         if (moeda[i-1].tamanho < Dia1) Dia1 = moeda[i-1].tamanho ;
-        if (moeda[i].retorno = (float *) malloc(sizeof(float)*moeda[i-1].tamanho) == NULL) fprintf (stderr,"Falha alocando area para retornos por moeda.\n") ;
+        if ((moeda[i-1].retorno = (float *) malloc(sizeof(float)*moeda[i-1].tamanho) )== NULL) fprintf (stderr,"Falha alocando area para retornos por moeda.\n") ;
     }
     char linha[255] ; //Array auxiliar de leitura linha a linha dos arquivos
     char Preco[10] ; //Recebe os valores das moedas como string. Posteriormente utilizado como parametro para atof
@@ -152,7 +152,7 @@ int main(int argc, char* argv[])
     for(i = 0; i < 4; i++){ //inicializacoes das variaveis acumuladoras de portifolios
         portif[i].somaret = 0 ;
         portif[i].rettotal = 1 ;
-        if (portif[i].retorno = (float *) malloc(sizeof(float)*Dia1) == NULL) fprintf (stderr,"Falha alocando area para retornos por portifolio.\n") ;
+        if ((portif[i].retorno = (float *) malloc(sizeof(float)*Dia1)) == NULL) fprintf (stderr,"Falha alocando area para retornos por portifolio.\n") ;
         for (k=0 ; k < Dia1 ; k++){
            portif[i].retorno[k] = 0 ;
         }
