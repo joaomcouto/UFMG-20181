@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+#include <time.h>
 
 
 // Premissa: \r ou \n nao tem significado como conteudo do arquivo
@@ -56,6 +57,25 @@ int main(int argc, char* argv[])
     int i, j , k;
     time_t t;
     typedef struct {
+        float proporcao[10];
+        float retorno[15000];
+        float dmaior[9];
+        float dmenor[9];
+        float menorret ;
+        float maiorret ;
+        int indicemaior ;
+        int indicemenor ;
+        float somaret ;
+        float mediaret ;
+        float somades2;
+        float desviopadrao;
+        double sharpe ;
+        float rettotal ;
+
+    } TipoPortifolio;
+    TipoPortifolio portif[4] ;
+
+    typedef struct {
         FILE *m ;
         int tamanho ;
         char dcorr[9], dant[9] ;
@@ -77,46 +97,32 @@ int main(int argc, char* argv[])
 
     int Dia1 = 100000;
 
-    typedef struct {
-        float proporcao[argc-1];
-        float retorno[15000];
-        float dmaior[9];
-        float dmenor[9];
-        float menorret ;
-        float maiorret ;
-        int indicemaior ;
-        int indicemenor ;
-        float somaret ;
-        float mediaret ;
-        float somades2;
-        float desviopadrao;
-        float sharpe ;
-        float rettotal ;
 
-    }TipoPortifolio ;
+
         char dataretorno[15000][9] ;
 
-    TipoPortifolio port[4] ;
-
-    for (i=0; i<argc-1; i++){
-        port[0].proporcao[i] = (1/argc-1) ;
-        for (j=1; j<=3; j++){
-            srand((unsigned) time(&t));
-            port[j].proporcao[i] = rand() ;
-        }
-    }
-    int total = 0;
-    for (j=1; j<=3; j++){
-        for (i=0; i<argc-1; i++){
-            total += port[j].proporcao[i] ;
-        }
-        for (i=0; i<argc-1; i++){
-            port[j].proporcao[i] /= total ;
-        }
-    }
-
-
+    srand(time(NULL));
+    float aux = 1 ;
     TipoMoeda moeda[argc-1];
+    for (i=0; i<argc-1; i++){
+        portif[0].proporcao[i] = (aux/(argc-1)) ;
+        for (j=1; j<=3; j++){
+           while ((portif[j].proporcao[i] = rand())== portif[j].proporcao[i-1]);
+        }
+    }
+
+    for (j=1; j<=3; j++){
+        float total = 0;
+        for (i=0; i<argc-1; i++){
+            total += portif[j].proporcao[i] ;
+        }
+        for (i=0; i<argc-1; i++){
+            portif[j].proporcao[i] /= total ;
+        }
+    }
+
+
+
 
 
     char FileName[MAX_PATH];
@@ -148,12 +154,10 @@ int main(int argc, char* argv[])
         moeda[i].rettotal = 0 ;
     }
     for(i = 0; i < 4; i++){ //inicializacao dos portifolios
-        port[i].somaret = 0 ;
-        port[i].menorret = -10000 ;
-        port[i].maiorret = 10000 ;
-        port[i].rettotal = 1 ;
+        portif[i].somaret = 0 ;
+        portif[i].rettotal = 1 ;
         for (k=0 ; k < Dia1 ; k++){
-           port[i].retorno[k] = 0 ;
+           portif[i].retorno[k] = 0 ;
         }
     }
     for(i = 0 ; i < argc-1 ; i++){
@@ -168,7 +172,7 @@ int main(int argc, char* argv[])
             if (j<Dia1){
                 strncpy(dataretorno[j-1], moeda[i].dcorr, sizeof(dataretorno[1])) ;
                 for (k=0 ; k < 4; k++){
-                    port[k].retorno[j-1] += ((port[k].proporcao[i])*(moeda[i].rcorr)) ;
+                    portif[k].retorno[j-1] += ((portif[k].proporcao[i])*(moeda[i].rcorr)) ;
 
                 }
             }
@@ -197,42 +201,47 @@ int main(int argc, char* argv[])
     }
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////
     for (i=0; i < 4; i++){
-        for (j=0; j<=Dia1-2; j++){
-            if (port[i].retorno[j] < port[i].menorret){
-                port[i].indicemenor = j ;
-                port[i].menorret = port[i].retorno[j] ;
+        portif[i].menorret = portif[i].retorno[0] ;
+        portif[i].indicemenor = 0 ;
+        portif[i].maiorret = portif[i].retorno[0] ;
+        portif[i].indicemaior = 0 ;
+        for (j=1; j<=Dia1-1; j++){
+            if (portif[i].retorno[j] < portif[i].menorret){
+                portif[i].indicemenor = j ;
+                portif[i].menorret = portif[i].retorno[j] ;
 
             }
-            if (port[i].retorno[j] > port[i].maiorret){
-                port[i].indicemaior = j ;
-                port[i].maiorret = port[i].retorno[j] ;
+            if (portif[i].retorno[j] > portif[i].maiorret){
+                portif[i].indicemaior = j ;
+                portif[i].maiorret = portif[i].retorno[j] ;
             }
         }
     }
     for (i=0 ; i < 4 ; i++){
         for (j=0 ; j<=Dia1-2 ; j++){
-            port[i].somaret += port[i].retorno[j] ;
+            portif[i].somaret += portif[i].retorno[j] ;
         }
-        port[i].mediaret = port[i].somaret/(Dia1-1) ;
+        portif[i].mediaret = portif[i].somaret/(Dia1-1) ;
     }
 
-    for (i = 0; i < 4 ; i++) { //
+    for (i = 0; i < 4 ; i++) {
+        portif[i].somades2 = 0 ;
         for(j=0 ; j <= Dia1-2 ; j++ ){
-            port[i].rettotal *= (1+port[i].retorno[j]) ;
-            port[i].somades2 += (port[i].retorno[j] - port[i].mediaret)*(port[i].retorno[j] - port[i].mediaret) ; //
+            portif[i].rettotal *= (1+portif[i].retorno[j]) ;
+            portif[i].somades2 += (portif[i].retorno[j] - portif[i].mediaret)*(portif[i].retorno[j] - portif[i].mediaret) ; //
         }
-       port[i].desviopadrao = sqrt(port[i].somades2 / Dia1) ;
-       port[i].sharpe = (port[i].mediaret - 0.00038)/port[i].desviopadrao ;
+       portif[i].desviopadrao = sqrt(portif[i].somades2 / (Dia1-1)) ;
+       portif[i].sharpe = (portif[i].mediaret - 0.00038)/portif[i].desviopadrao ;
     }
 
 
 
-    printf("%15s %15s %10s %10s %10s %10s %10s %10s\n", "DataMenor", "DataMaior","Menor","Maior","Media","Desvio","RTotal", "Sharpe") ;
+    printf("%22s %15s %10s %10s %10s %10s %10s %10s\n", "DataMenor", "DataMaior","Menor","Maior","Media","Desvio","RTotal", "Sharpe") ;
     char auxmenor[9] ;
     char auxmaior[9] ;
 
     for (i= 0 ; i < argc-1 ; i++){
-        printf ("%-5s ",argv[i+1] );
+        printf ("%-12s ",argv[i+1] );
         printf (  "%02s"    ,strtok(moeda[i].dmenor  , "/"  ) );
         printf (  "/%02s"   ,strtok(NULL             , "/"  ) );
         printf ( "/20%2s  "   ,strtok(NULL             , "\0" ) );
@@ -244,26 +253,39 @@ int main(int argc, char* argv[])
         printf ("%10.2f%%", moeda[i].rmaior*100) ;
         printf ("%9.2f%%", moeda[i].mediaret*100) ;
         printf ("%10.2f%%", moeda[i].desviopadrao*100) ;
-        printf ("%11.2lf%%", moeda[i].rettotal*100) ;
+        printf ("%11.2f%%", moeda[i].rettotal*100) ;
         printf ("%11.2lf%%", moeda[i].sharpe*100) ;
         printf ("\n") ;
     }
+    char aux1[9] ;
     for (i= 0 ; i < 4 ; i++){
-        printf ("%s%-15d ","PORTIFOLIO", i+1 );
-        printf (  "%02s"    ,strtok(dataretorno[port[i].indicemenor]  , "/"  ) );
+        printf ("%s%-2d ","PORTIFOLIO", i+1 );
+        strncpy(aux1,dataretorno[portif[i].indicemenor], sizeof(aux1)) ;
+        printf (  "%02s"    ,strtok( aux1, "/"  ) );
         printf (  "/%02s"   ,strtok(NULL             , "/"  ) );
         printf ( "/20%2s  "   ,strtok(NULL             , "\0" ) );
         printf ( "    " ) ;
-        printf (  "%02s"    ,strtok(dataretorno[port[i].indicemaior]  , "/"  ) );
+        strncpy(aux1,dataretorno[portif[i].indicemaior], sizeof(aux1)) ;
+        printf (  "%02s"    ,strtok(aux1 , "/"  ) );
         printf (  "/%02s"   ,strtok(NULL             , "/"  ) );
         printf ( "/20%2s  "   ,strtok(NULL             , "\0" ) );
-        printf ("%8.2f%%", port[i].menorret*100) ;
-        printf ("%10.2f%%", port[i].maiorret*100) ;
-        printf ("%9.2f%%", port[i].mediaret*100) ;
-        printf ("%10.2f%%", port[i].desviopadrao*100) ;
-        printf ("%11.2lf%%", port[i].rettotal*100) ;
-        printf ("%11.2lf%%", port[i].sharpe*100) ;
+        printf ("%8.2f%%", portif[i].menorret*100) ;
+        printf ("%10.2f%%", portif[i].maiorret*100) ;
+        printf ("%9.2f%%", portif[i].mediaret*100) ;
+        printf ("%10.2f%%", portif[i].desviopadrao*100) ;
+        printf ("%11.2f%%", portif[i].rettotal*100) ;
+        printf ("%11.2lf%%", portif[i].sharpe*100) ;
         printf ("\n") ;
     }
+        printf ("\n") ;
+        printf ("PORPORCOES:\n") ;
+        printf ("\n") ;
+        for (i= 0 ; i < 4 ; i++){
+            printf ("%s%-15d ","PORTIFOLIO", i+1 );
+            for (j=0 ; j < argc-1 ; j++){
+                printf("%f,  ", portif[i].proporcao[j]) ;
+            }
+            printf("\n") ;
+        }
     return 0 ;
 }
