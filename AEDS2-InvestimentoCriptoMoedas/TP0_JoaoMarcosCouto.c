@@ -58,13 +58,10 @@ int main(int argc, char* argv[])
         float *retorno; //armazena os valores de retorno para cada portifolio
         float dmaior[9];
         float dmenor[9];
-        float menorret ;
-        float maiorret ;
-        int indicemaior ;
-        int indicemenor ;
-        float somaret ;
-        float mediaret ;
-        float somades2;
+        float menorret, maiorret ;
+        int indicemaior , indicemenor;
+        float somaret, mediaret  ;
+        float somades2; //Somatorio necessario para o calculo do desvio padrao
         double desviopadrao;
         double sharpe ;
         float rettotal ;
@@ -74,8 +71,8 @@ int main(int argc, char* argv[])
 
     typedef struct { //armazena dados relevantes para moedas
         FILE *m ;
-        int tamanho ;
-        char dcorr[9], dant[9] ;
+        int tamanho ; //numero de registros no arquivo da moeda
+        char dcorr[9], dant[9] ; //dia corrente e dia anteior
         float pcorr , pant ; //preco corrente e preco do dia anterior
         float rcorr ; //retorno corrente (do dia em navegacao em relacao ao anterior a ele)
         char dmaior[9], dmenor[9];
@@ -83,20 +80,13 @@ int main(int argc, char* argv[])
         double p1 ; //valor da moeda no dia 1 da moeda
         double pf ; //valor da moeda no dia final da moeda
         double rettotal ;
-        float mediaret ;
-        float somades2 ;
+        float mediaret, somades2 ;
         float *retorno;
-        double desviopadrao ;
-        double sharpe ;
+        double desviopadrao , sharpe;
         float rmaior, rmenor ;
     } TipoMoeda ;
 
     int Dia1 = 100000;
-
-
-
-    char dataretorno[15000][9] ;
-
     srand(time(NULL));
     float aux = 1 ;
     TipoMoeda moeda[argc-1];
@@ -106,7 +96,6 @@ int main(int argc, char* argv[])
            while ((portif[j].proporcao[i] = rand())== portif[j].proporcao[i-1]);
         }
     }
-
     for (j=1; j<=3; j++){ //assegura que a soma das proporcoes seja igual a 1 para todos os portifolios
         float total = 0;
         for (i=0; i<argc-1; i++){
@@ -116,11 +105,6 @@ int main(int argc, char* argv[])
             portif[j].proporcao[i] /= total ;
         }
     }
-
-
-
-
-
     char FileName[MAX_PATH];
     for (i=1 ; i<argc ; i++){ //Faz a abertura dos arquivos cahamados por parametro de linha de comando
         strncpy(FileName, argv[i],sizeof(FileName)) ;
@@ -135,6 +119,15 @@ int main(int argc, char* argv[])
         if (moeda[i-1].tamanho < Dia1) Dia1 = moeda[i-1].tamanho ;
         if ((moeda[i-1].retorno = (float *) malloc(sizeof(float)*moeda[i-1].tamanho) )== NULL) fprintf (stderr,"Falha alocando area para retornos por moeda.\n") ;
     }
+    // Tentativa falha de alocar dinamicamente a matriz de chars dataretorno
+    //char **dataretorno;
+    //dataretorno = (char**)calloc(Dia1, sizeof(char*)) ;
+    //for (i=0 ; i<Dia1 ; i++){
+    //    dataretorno[i] = calloc(9,sizeof(char)) ;
+    //    //dataretorno[i][0] = '\0' ;
+    //}
+    char dataretorno[15000][9];
+
     char linha[255] ; //Array auxiliar de leitura linha a linha dos arquivos
     char Preco[10] ; //Recebe os valores das moedas como string. Posteriormente utilizado como parametro para atof
     for (i = 0; i < argc-1 ; i++){ //inicializacoes das variaveis acumuladoras de moedas
