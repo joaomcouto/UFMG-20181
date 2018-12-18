@@ -1,0 +1,77 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <math.h>
+#include <time.h>
+
+int main(int argc, char* argv[]){
+    // printf ("%s", magicnumber) ;
+    FILE* pgm ;
+    FILE* aux ;
+    int i, j ;
+
+
+    char FileName[MAX_PATH] ;
+    strncpy(FileName, argv[1], sizeof(FileName)) ;
+    strncat(FileName, ".pgm" , sizeof(FileName)-strlen(FileName)) ;
+    pgm = fopen(FileName, "r") ;
+    strcpy(FileName, argv[1]) ;
+    strcat(FileName, ".txt") ;
+    aux = fopen(FileName, "r") ;
+
+
+    char magicnumber[2] ;
+    int TamX , TamY ;
+    int temp ;
+    int PixelDepth ;
+    //leituras iniciais do pgm
+    fgets(magicnumber, MAX_PATH, pgm) ;
+    fscanf(pgm, "%d %d", &TamX, &TamY);
+    fscanf(pgm, "%d", &PixelDepth);
+    //printf ("%d %d %d\n", TamX, TamY, PixelDepth) ;
+
+
+    //leituras iniciais do aux
+    int NumSementes, T;
+    fscanf(aux, "%d\n%d", &NumSementes, &T) ;
+    //printf ("%d %d", NumSementes, T) ;
+
+
+
+
+    int image[TamY][TamX] ;
+    int seg[TamY][TamX] ;
+
+    for (i =0 ; i < TamY ; i++){
+        for (j= 0; j < TamX ; j++){
+            //seg[i][j] = 0 ;
+        }
+        printf ("\n") ;
+    }
+
+
+
+    for (i =0 ; i < TamY ; i++){
+        for (j= 0; j < TamX ; j++){
+            fscanf(pgm, "%d", &image[i][j]) ;
+        }
+    }
+   /* for (i =0 ; i < TamY ; i++){
+        for (j= 0; j < TamX ; j++){
+            printf(" %d", image[i][j]) ;
+        }
+        printf ("\n") ;
+    }
+    */
+
+
+
+
+
+
+
+
+
+
+return 0 ;
+}
